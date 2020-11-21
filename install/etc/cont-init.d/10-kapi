@@ -1,0 +1,15 @@
+#!/usr/bin/with-contenv bash
+
+source /assets/functions/00-container
+prepare_service
+
+PROCESS_NAME="kapi"
+
+mkdir -p "${CONFIG_PATH}"
+configure_logging
+
+print_debug "Configuring KAPI"
+configure_kapi
+print_debug "Finished Configuring KAPI"
+
+liftoff

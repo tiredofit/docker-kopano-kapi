@@ -1,0 +1,29 @@
+version: '2.4'
+services:
+
+  kapi-app:
+    image: tiredofit/kopano-kapi:latest
+    container_name: kapi-app
+    volumes:
+      - ./logs/kapi:/logs
+      - ./data:/data
+      - ./config:/config
+      - ./certs:/certs
+      - ./assets/custom:/assets/custom
+      - ./sockets:/var/run/kopano-grapi
+    environment:
+      - TIMEZONE=America/Vancouver
+      - CONTAINER_LOG_LEVEL=DEBUG
+      - DEBUG_MODE=FALSE
+      - LOG_LEVEL=DEBUG
+
+      - OIDC_ISSUER_IDENTIFIER=https://konnect.example.com
+    networks:
+      - services
+    restart: always
+
+networks:
+  proxy:
+    external: true
+  services:
+    external: true

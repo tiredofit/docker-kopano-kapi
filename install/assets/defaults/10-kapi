@@ -1,0 +1,46 @@
+#!/usr/bin/with-contenv bash
+
+CONFIG_PATH=${CONFIG_PATH:-"/config/"}
+LOG_FILE=${LOG_FILE:-"kapi.log"}
+LOG_LEVEL=${LOG_LEVEL:-"DEBUG"}
+LOG_PATH=${LOG_PATH:-"/logs/"}
+LOG_TIMESTAMPS=${LOG_TIMESTAMPS:-"TRUE"}
+LOG_TYPE=${LOG_TYPE:-"FILE"}
+SERVER_ENABLE_HTTP=${SERVER_ENABLE_HTTP:-"FALSE"}
+SERVER_ENABLE_HTTPS=${SERVER_ENABLE_HTTPS:-"FALSE"}
+SERVER_LISTEN_PORT=${SERVER_LISTEN_PORT_:-236}
+SERVER_LISTEN_PORT_SECURE=${SERVER_LISTEN_PORT_SECURE:-237}
+SETUP_TYPE=${SETUP_TYPE:-"AUTO"}
+
+KAPI_CONFIG_FILE=${KAPI_CONFIG_FILE:-"kapid.cfg"}
+KAPI_DISABLE_TLS_VALIDATION=${KAPI_DISABLE_TLS_VALIDATION:-"FALSE"}
+KAPI_HOST_SECURE=${KAPI_HOST_SECURE:-"FALSE"}
+KAPI_KVS_DB_SQLITE_FILE=${KAPI_KVS_DB_SQLITE_FILE:-"/data/kapi/kvs/kvs.db"}
+KAPI_KVS_DB_TYPE=${KAPI_KVS_DB_TYPE:-"SQLITE3"}
+KAPI_KVS_PATH_DB_MIGRATIONS=${KAPI_KVS_PATH_DB_MIGRATIONS:-"/usr/lib/kopano/kapi-kvs/db/migrations"}
+KAPI_LISTEN_HOST=${KAPI_LISTEN_HOST:-"0.0.0.0"}
+KAPI_LISTEN_PORT=${KAPI_LISTEN_PORT:-8039}
+KAPI_PATH_PLUGINS=${KAPI_PATH_PLUGINS:-"/usr/lib/kopano/kapid-plugins"}
+KAPI_PLUGINS=${KAPI_PLUGINS:-"grapi kvs pubs"}
+KAPI_PUBS_SECRET_KEY_FILE=${KAPI_PUBS_SECRET_KEY_FILE:-"/certs/kapi/kapid-pubs-secret.key"}
+
+truefalse_yesno ENABLE_COREDUMPS
+####
+
+###
+if var_true "${SERVER_ENABLE_HTTP}" || var_true "${SERVER_ENABLE_HTTPS}" ; then
+    if var_true "${SERVER_ENABLE_HTTPS}" ; then
+        SOCKET_SERVER=${SOCKET_SERVER:-"https://server:${SERVER_LISTEN_PORT_SECURE}"}
+    elif var_true "${SERVER_ENABLE_HTTP}" ; then
+        SOCKET_SERVER=${SOCKET_SERVER:-"http://server:${SERVER_LISTEN_PORT}"}
+    fi
+    if [[ "${SOCKET_SERVER}" == *"htt"*"://server:"* ]] ; then
+        if ! grep -q "127.0.0.1 server" /etc/hosts ; then
+            echo "127.0.0.1 server" >> /etc/hosts
+        fi
+    fi
+else
+    SOCKET_SERVER=${SOCKET_SERVER:-"file:///var/run/kopano/server.sock"}
+fi
+
+KAPI_SOCKET_SERVER=${KAPI_SOCKET_SERVER:-"${SOCKET_SERVER}"}
